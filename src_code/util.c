@@ -30,7 +30,7 @@ int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     char* delim_pos = NULL;
     int i = 0;
     int pos = 0;
-    int line_len = 0;5                                              
+    int line_len = 0;                                              
     
     /*curr_pos不累计会覆盖，fp指向FILE 结构，因此会记住当前的文件输出位置，也就是会累计;
         while循环的实际作用，获得文件中的root信息、port值、thread数量和当前行行长，

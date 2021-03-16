@@ -33,6 +33,7 @@ void accept_connection(int listen_fd, int epoll_fd, char* path);
 
 #endif
 
+/*
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -44,3 +45,4 @@ void accept_connection(int listen_fd, int epoll_fd, char* path);
 #include "util.h"
 #include "http_request.h"
 #include "epoll.h"
+*/
