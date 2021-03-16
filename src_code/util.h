@@ -6,7 +6,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-//路径名长度
+/*路径名长度*/
 #define PATHLEN 128
 #define LISTENQ 1024
 #define BUFLEN 8192
@@ -15,7 +15,7 @@
 #define TK_CONF_OK 0
 #define TK_CONF_ERROR -1
 
-//用MIN宏定义来代替min函数
+/*用MIN宏定义来代替min函数*/
 #define MIN(a, b) ((a) < (b) ? (a) : (b))
 
 typedef struct tk_conf{

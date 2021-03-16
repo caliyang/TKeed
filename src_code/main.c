@@ -9,11 +9,11 @@
 
 #define DEFAULT_CONFIG "tkeed.conf"
 
-//声明结构体指针events，02？？？
+/*声明结构体指针events，02？？？*/
 extern struct epoll_event *events;  
-//conf_file char指针指向"tkeed.conf"字符串
+/*conf_file char指针指向"tkeed.conf"字符串*/
 char *conf_file = DEFAULT_CONFIG;  
-//typedef将struct tk_conf的别名定义为tk_conf_t的原因，01？？？
+/*typedef将struct tk_conf的别名定义为tk_conf_t的原因，01？？？*/
 tk_conf_t conf;
 
 int main(int argc, char *argv[]){
