@@ -14,6 +14,8 @@
 #include "http_request.h"
 #include "epoll.h"
 
+/*该函数的作用时是从filename所指向的配置文件中
+    读取根目录、端口和线程数等信息到conf所指向的结构体中*/
 int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     // 以只读方式打开文件
     FILE* fp = fopen(filename, "r"); //#include <stdio.h>
