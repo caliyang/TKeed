@@ -9,7 +9,7 @@
 
 #define DEFAULT_CONFIG "tkeed.conf"
 
-/*声明结构体指针events，02？？？*/
+/*声明全局变量结构体指针events*/
 extern struct epoll_event *events;  
 /*conf_file char指针指向"tkeed.conf"字符串*/
 char *conf_file = DEFAULT_CONFIG;  
@@ -34,8 +34,11 @@ int main(int argc, char *argv[]){
     int rc = make_socket_non_blocking(listen_fd);
 
     // 创建epoll并注册监听描述符
+    /*创建一个epoll句柄，并为event结构体数组分分配内存*/
     int epoll_fd = tk_epoll_create(0);
+    /*为tk_http_request_t结构体分配内存*/
     tk_http_request_t* request = (tk_http_request_t*)malloc(sizeof(tk_http_request_t));
+     /*初始化tk_http_request_t结构体*/
     tk_init_request_t(request, listen_fd, epoll_fd, conf.root);
     tk_epoll_add(epoll_fd, listen_fd, request, (EPOLLIN | EPOLLET));
 

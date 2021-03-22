@@ -5,15 +5,21 @@
 #ifndef TK_LIST_H
 #define TK_LIST_H
 
+/*为什么需要这一选择编译过程，01？？？*/
 #ifndef NULL
 #define NULL 0
 #endif
 
+/*list_head_t，01？？？*/
+/*双向链表*/
 typedef struct list_head {
     struct list_head *prev, *next;
 }list_head;
 
 // 初始化链表
+/*结尾的反斜杠起到换行作用，用于宏定义和字符串换行，其中宏定义中使用居多；
+    如果一行代码有很多元素，导致太长影响阅读，可以通过在结尾加\的方式，实现换行，
+    编译时会忽略\及其后的换行符，当做一行处理。*/
 #define INIT_LIST_HEAD(ptr) do {\
     struct list_head *_ptr = (struct list_head *)ptr;   \
     (_ptr)->next = (_ptr); (_ptr->prev) = (_ptr);       \

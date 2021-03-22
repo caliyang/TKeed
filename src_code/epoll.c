@@ -6,8 +6,9 @@
 
 struct epoll_event* events;
 
+/*创建一个epoll句柄，并为event结构体数组分分配内存*/
 int tk_epoll_create(int flags){
-    int epoll_fd = epoll_create1(flags);
+    int epoll_fd = epoll_create1(flags); //#include <sys/epoll.h>
     if(epoll_fd == -1)
         return -1;
     events = (struct epoll_event*)malloc(sizeof(struct epoll_event) * MAXEVENTS);

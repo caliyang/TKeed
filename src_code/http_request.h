@@ -85,7 +85,8 @@ typedef struct tk_http_header_handle{
     tk_http_header_handler_pt handler;    // 函数指针
 }tk_http_header_handle_t;
 
-extern tk_http_header_handle_t tk_http_headers_in[];
+/*全局变量 tk_http_headers_in 的声明*/
+extern tk_http_header_handle_t tk_http_headers_in[]; 
 
 void tk_http_handle_header(tk_http_request_t* request, tk_http_out_t* out);
 int tk_http_close_conn(tk_http_request_t* request);
