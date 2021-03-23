@@ -73,7 +73,7 @@ int tk_init_request_t(tk_http_request_t* request, int fd, int epoll_fd, char* pa
     request->state = 0;
     /*配置目录*/
     request->root = path;
-    /*存储请求头，list.h中定义了此结构*/
+    /*存储请求头，初始化以 list_head 为哨兵的双向链表*/
     INIT_LIST_HEAD(&(request->list));
     return 0;
 }

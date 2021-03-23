@@ -81,10 +81,8 @@ typedef struct tk_http_header{
     struct list_head list;
 }tk_http_header_t;
 
-/**/
 typedef int (*tk_http_header_handler_pt)(tk_http_request_t* request, tk_http_out_t* out, char* data, int len);
 
-/**/
 typedef struct tk_http_header_handle{
     char* name;
     tk_http_header_handler_pt handler;    // 函数指针
