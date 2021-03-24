@@ -22,7 +22,7 @@ typedef struct threadpool{
     pthread_mutex_t lock;    // 互斥锁；#include <pthreadtypes.h>，包含于#include <pthread.h>
     pthread_cond_t cond;    // 条件变量；#include <pthreadtypes.h>，包含于#include <pthread.h>
     pthread_t *threads;    // 线程；#include <pthreadtypes.h>，包含于#include <pthread.h>
-    tk_task_t *head;    // 任务链表（链表中某节点）
+    tk_task_t *head;    // 任务链表（链表中的头节点）
     int thread_count;    // 线程数 
     int queue_size;    // 任务链表长
     int shutdown;     // 关机模式

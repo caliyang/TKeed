@@ -115,29 +115,34 @@ int threadpool_destory(tk_threadpool_t *pool, int graceful){
 }
 
 // 初始化线程池
+/*  分配并初始化线程池 */
 tk_threadpool_t *threadpool_init(int thread_num){
     // 分配线程池
+    /*定义线程池结构体指针，分配线程池结构体内存，
+        再将malloc返回的指针拷贝赋值给之前定义的线程池结构体指针*/
     tk_threadpool_t* pool;
     if((pool = (tk_threadpool_t *)malloc(sizeof(tk_threadpool_t))) == NULL)
-        goto err;
+        goto err; 
 
     // threads指针指向线程数组（存放tid），数组大小即为线程数
-    pool->thread_count = 0;
-    pool->queue_size = 0;
-    pool->shutdown = 0;
-    pool->started = 0;
+    pool->thread_count = 0;  /* 线程数 */
+    pool->queue_size = 0; /* 任务链表长 */
+    pool->shutdown = 0; /* 关机模式 */
+    pool->started = 0; 
+     /*threads指针指向线程数组（存放tid），数组大小即为线程数*/
     pool->threads = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);
     
     // 分配并初始化task头结点
+    /*任务链表中的头结点*/
     pool->head = (tk_task_t*)malloc(sizeof(tk_task_t));
     if((pool->threads == NULL) || (pool->head == NULL))
         goto err;
-    pool->head->func = NULL;
+    pool->head->func = NULL; 
     pool->head->arg = NULL;
     pool->head->next = NULL;
 
     // 初始化锁
-    if(pthread_mutex_init(&(pool->lock), NULL) != 0)
+    if(pthread_mutex_init(&(pool->lock), NULL) != 0) //
         goto err;
 
     // 初始化条件变量
@@ -155,6 +160,7 @@ tk_threadpool_t *threadpool_init(int thread_num){
     }
     return pool;
 
+/*若指针pool已分配内存，则先释放在返回NULL，若没有分配内存，则直接返回NULL*/
 err:
     if(pool)
         threadpool_free(pool);
