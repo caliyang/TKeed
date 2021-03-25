@@ -5,29 +5,36 @@
 
 #include "threadpool.h"
 
-static int threadpool_free(tk_threadpool_t *pool);
-static void* threadpool_worker(void *arg);
+static int threadpool_free(tk_threadpool_t *pool); // 释放线程池
+static void* threadpool_worker(void *arg); //线程处理函数
 
 // 释放线程池
+/*释放线程池中的线程数组和 task 链表*/
+/*其他几个数据成员是如何销毁的，02？？？
+    直接free pool行吗，02？？？*/
 int threadpool_free(tk_threadpool_t *pool){
-    if(pool == NULL || pool->started > 0)
+    /*pool->started > 0 这一判断对应什么边界条件，02？？？*/
+    if(pool == NULL || pool->started > 0) 
         return -1;
 
     // 释放线程数组
+    /*线程池pool是由malloc分配的，因此里面的指针成员指向的内存是由free()函数释放*/
     if(pool->threads)
-        free(pool->threads);
+        free(pool->threads); // #include <stdlib.h>
     
 
     // 逐节点销毁task链表
+    /*从首节点一直free到尾节点*/
     tk_task_t *old;
     while(pool->head->next){
         old = pool->head->next;
         pool->head->next = pool->head->next->next;
-        free(old);
+        free(old); // #include <stdlib.h>
     }
     return 0;
 }
 
+/*线程处理函数*/
 void *threadpool_worker(void *arg){
     if(arg == NULL)
         return NULL;
@@ -75,12 +82,14 @@ void *threadpool_worker(void *arg){
 // 释放线程资源
 int threadpool_destory(tk_threadpool_t *pool, int graceful){
     if(pool == NULL)
+        /*枚举元素都是宏定义的常数*/
         return tk_tp_invalid;
     if(pthread_mutex_lock(&(pool->lock)) != 0)
         return tk_tp_lock_fail;
 
     int err = 0;
     do{
+        /*pool->shutdown 值为1时，表示关机模式*/
         if(pool->shutdown){
             err = tk_tp_already_shutdown;
             break;
@@ -106,6 +115,7 @@ int threadpool_destory(tk_threadpool_t *pool, int graceful){
         }
     }while(0);
 
+    /*释放内存前销毁互斥量和条件变量*/
     if(!err){
         pthread_mutex_destroy(&(pool->lock));
         pthread_cond_destroy(&(pool->cond));
@@ -115,13 +125,13 @@ int threadpool_destory(tk_threadpool_t *pool, int graceful){
 }
 
 // 初始化线程池
-/*  分配并初始化线程池 */
+/*  动态分配并初始化线程池 */
 tk_threadpool_t *threadpool_init(int thread_num){
     // 分配线程池
     /*定义线程池结构体指针，分配线程池结构体内存，
         再将malloc返回的指针拷贝赋值给之前定义的线程池结构体指针*/
     tk_threadpool_t* pool;
-    if((pool = (tk_threadpool_t *)malloc(sizeof(tk_threadpool_t))) == NULL)
+    if((pool = (tk_threadpool_t *)malloc(sizeof(tk_threadpool_t))) == NULL) // #include <stdlib.h>
         goto err; 
 
     // threads指针指向线程数组（存放tid），数组大小即为线程数
@@ -129,11 +139,11 @@ tk_threadpool_t *threadpool_init(int thread_num){
     pool->queue_size = 0; /* 任务链表长 */
     pool->shutdown = 0; /* 关机模式 */
     pool->started = 0; 
-     /*threads指针指向线程数组（存放tid），数组大小即为线程数*/
+     /*动态分配线程数组（存放tid），数组大小即为线程数*/
     pool->threads = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);
     
-    // 分配并初始化task头结点
-    /*任务链表中的头结点*/
+    // 分配并初始化 task 头结点
+    /*动态分配 task 链表中的头结点*/
     pool->head = (tk_task_t*)malloc(sizeof(tk_task_t));
     if((pool->threads == NULL) || (pool->head == NULL))
         goto err;
@@ -142,16 +152,17 @@ tk_threadpool_t *threadpool_init(int thread_num){
     pool->head->next = NULL;
 
     // 初始化锁
-    if(pthread_mutex_init(&(pool->lock), NULL) != 0) //
+    if(pthread_mutex_init(&(pool->lock), NULL) != 0) // #include <pthread.h>
         goto err;
 
     // 初始化条件变量
-    if(pthread_cond_init(&(pool->cond), NULL) != 0)
+    if(pthread_cond_init(&(pool->cond), NULL) != 0)  // #include <pthread.h>
         goto err;
 
     // 创建线程
     for(int i = 0; i < thread_num; ++i){
-        if(pthread_create(&(pool->threads[i]), NULL, threadpool_worker, (void*)pool) != 0){
+        /*经创建线程的属性置为 pool 是有问题的吧，02？？？？*/
+        if(pthread_create(&(pool->threads[i]), NULL, threadpool_worker, (void*)pool) != 0){ // #include <pthread.h>
             threadpool_destory(pool, 0);
             return NULL;
         }

@@ -45,8 +45,11 @@ typedef enum{
     graceful_shutdown = 2
 }tk_threadpool_sd_t;
 
+/*分配并初始化线程池*/
 tk_threadpool_t* threadpool_init(int thread_num);
+/**/
 int threadpool_add(tk_threadpool_t* pool, void (*func)(void *), void* arg);
+/*释放线程资源，不是释放线程池，释放线程池的函数是 threadpool_free*/
 int threadpool_destroy(tk_threadpool_t* pool, int gracegul);
 
 #endif
