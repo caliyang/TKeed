@@ -80,6 +80,7 @@ void *threadpool_worker(void *arg){
 }
 
 // 释放线程资源
+/*释放的线程资源包括互斥量和条件变量的释放与销毁，以及回收线程资源*/
 int threadpool_destory(tk_threadpool_t *pool, int graceful){
     if(pool == NULL)
         /*枚举元素都是宏定义的常数*/
@@ -88,6 +89,8 @@ int threadpool_destory(tk_threadpool_t *pool, int graceful){
         return tk_tp_lock_fail;
 
     int err = 0;
+    /*当执行一段代码到一半，想跳过剩下的一半的时候，
+        借助 do{...} while(0); 循环中，则能用 break 达到这个目的。*/
     do{
         /*pool->shutdown 值为1时，表示关机模式*/
         if(pool->shutdown){
@@ -95,6 +98,7 @@ int threadpool_destory(tk_threadpool_t *pool, int graceful){
             break;
         }
 
+        /*线程创建失败时，应立即关机，即 graceful = 0 */
         pool->shutdown = (graceful) ? graceful_shutdown : immediate_shutdown;
 
         if(pthread_cond_broadcast(&(pool->cond)) != 0){
