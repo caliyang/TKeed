@@ -39,7 +39,7 @@ void *threadpool_worker(void *arg){
     if(arg == NULL)
         return NULL;
     
-    /*将 void * 转换为 tk_threadpool_t * */
+    /*将 void * 再转换为 tk_threadpool_t * */
     tk_threadpool_t *pool = (tk_threadpool_t *)arg;
     tk_task_t *task;
     while(1){
@@ -62,6 +62,7 @@ void *threadpool_worker(void *arg){
         // 得到第一个task
         task = pool->head->next;
         // 没有task则开锁并进行下一次循环
+        /* while 循环可以保证 task 不为 null 了吧，02？？？ */
         if(task == NULL){
             pthread_mutex_unlock(&(pool->lock));
             continue;
@@ -70,6 +71,9 @@ void *threadpool_worker(void *arg){
         // 存在task则取走并开锁
         pool->head->next = task->next;
         pool->queue_size--;
+        /* 虽然 pool->head->next = task->next ，但是之前 task = pool->head->next 中的 
+            pool->head->next 还在，它依然指向 task->next ，不会因为 free task 而消失，
+            两者是独立的变量，因此原先的 pool->head->next 还在 */
         pthread_mutex_unlock(&(pool->lock));
 
         // 设置task中func参数
