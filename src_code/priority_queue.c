@@ -112,6 +112,3 @@ int tk_pq_insert(tk_pq_t *tk_pq, void *item){
     swim(tk_pq, tk_pq->nalloc);
     return 0;
 }
-
-
-

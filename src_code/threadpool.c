@@ -7,14 +7,14 @@
 
 /*释放线程池中的线程数组和 task 链表*/
 static int threadpool_free(tk_threadpool_t *pool); 
+/*线程工作函数，包含线程处理函数 */
 static void* threadpool_worker(void *arg); 
 
 // 释放线程池
 /*释放线程池中的线程数组和 task 链表*/
-/*其他几个数据成员是如何销毁的，02？？？
-    直接free pool行吗，02？？？*/
+/*其他几个数据成员是如何销毁的，02？？？直接free pool行吗，02？？？*/
 int threadpool_free(tk_threadpool_t *pool){
-    /*pool->started > 0 这一判断对应什么边界条件，02？？？*/
+    /*pool->started > 0 这一判断对应于执行线程的个数大于 0 */
     if(pool == NULL || pool->started > 0) 
         return -1;
 
@@ -24,7 +24,7 @@ int threadpool_free(tk_threadpool_t *pool){
         free(pool->threads); // #include <stdlib.h>
 
     // 逐节点销毁task链表
-    /*从首节点一直free到尾节点*/
+    /*从首节点一直 free 到尾节点*/
     tk_task_t *old;
     while(pool->head->next){
         old = pool->head->next;
@@ -34,7 +34,7 @@ int threadpool_free(tk_threadpool_t *pool){
     return 0;
 }
 
-/*线程处理函数*/
+/*线程工作函数，包含线程处理函数 */
 void *threadpool_worker(void *arg){
     if(arg == NULL)
         return NULL;
@@ -46,8 +46,9 @@ void *threadpool_worker(void *arg){
         // 对线程池上锁
         pthread_mutex_lock(&(pool->lock));
 
-        // 没有task且未停机则阻塞
         /* shutdown：0-未停机模式，1-立即停机模式，2-平滑停机模式 */
+        // 没有task且未停机则阻塞
+        /* 用 while 循环防止虚假唤醒 */
         while((pool->queue_size == 0) && !(pool->shutdown))
             pthread_cond_wait(&(pool->cond), &(pool->lock));
         
@@ -60,6 +61,7 @@ void *threadpool_worker(void *arg){
             break;
 
         // 得到第一个task
+        /* 将头结点拷贝赋值给 task 节点 */
         task = pool->head->next;
         // 没有task则开锁并进行下一次循环
         /* while 循环可以保证 task 不为 null 了吧，02？？？ */
@@ -73,15 +75,17 @@ void *threadpool_worker(void *arg){
         pool->queue_size--;
         /* 虽然 pool->head->next = task->next ，但是之前 task = pool->head->next 中的 
             pool->head->next 还在，它依然指向 task->next ，不会因为 free task 而消失，
-            两者是独立的变量，因此原先的 pool->head->next 还在 */
+            两者是独立的变量，因此原先的 pool->head->next 还在，02？？？ */
         pthread_mutex_unlock(&(pool->lock));
 
         // 设置task中func参数
+        /* 调用函数指针 fun，执行线程处理函数 */
         (*(task->func))(task->arg);
+         /* 线程处理函数返回，task 结束，释放 task 节点 */
         free(task);
     }
     
-    /* 工作线程的个数减 1 */
+    /* 执行线程的个数减 1 */
     pool->started--;
     pthread_mutex_unlock(&(pool->lock));
     /* #define NULL ((void *)0)，线程的退出码为0 */
@@ -193,6 +197,7 @@ err:
     return NULL;
 }
 
+/* 向线程池添加 task 节点于 首节点 */
 int threadpool_add(tk_threadpool_t* pool, void (*func)(void *), void *arg){
     int rc, err = 0;
     if(pool == NULL || func == NULL)
@@ -208,13 +213,17 @@ int threadpool_add(tk_threadpool_t* pool, void (*func)(void *), void *arg){
     }
 
     // 新建task并注册信息
+    /* 分配并初始化 task 节点 */
     tk_task_t *task = (tk_task_t *)malloc(sizeof(tk_task_t));
     if(task == NULL)
         goto out;
+    /* 线程处理函数 */
     task->func = func;
+    /* 线程处理函数的参数 */
     task->arg = arg;
 
     // 新task节点在head处插入
+    /* 向链表插入或删除节点的顺序：“先加后改再删” */
     task->next = pool->head->next;
     pool->head->next = task;
     pool->queue_size++;

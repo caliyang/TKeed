@@ -9,17 +9,20 @@
 tk_pq_t tk_timer;
 size_t tk_current_msec;
 
+/* 比较两个计时器的超时时间 */
 int timer_comp(void* ti, void* tj){
     tk_timer_t* timeri = (tk_timer_t*)ti;
     tk_timer_t* timerj = (tk_timer_t*)tj;
     return (timeri->key < timerj->key) ? 1 : 0;
 }
 
+// 获取当前时间
+/* 将当前时间用微秒表示 */
 void tk_time_update(){
-    // 获取当前时间
+    /* 通过 gettimeofday 函数将当前时间表示为秒和微秒存储在 timeval 结构中 */
     struct timeval tv;
-    int rc = gettimeofday(&tv, NULL);
-    tk_current_msec = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+    int rc = gettimeofday(&tv, NULL); // #include <sys/time.h>
+    tk_current_msec = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000)); 
 }
 
 int tk_timer_init(){

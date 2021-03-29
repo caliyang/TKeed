@@ -34,7 +34,8 @@ typedef struct threadpool{
 typedef enum{
     tk_tp_invalid = -1,
     tk_tp_lock_fail = -2,
-    tk_tp_already_shutdown = -3,
+    /* 向已设置关机的线程池中添加任务 */
+    tk_tp_already_shutdown = -3, 
     tk_tp_cond_broadcast = -4,
     tk_tp_thread_fail = -5,
 }tk_threadpool_error_t;
