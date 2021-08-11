@@ -64,14 +64,14 @@ static int tk_http_process_if_modified_since(tk_http_request_t* request, tk_http
 int tk_init_request_t(tk_http_request_t* request, int fd, int epoll_fd, char* path){
     // 初始化tk_http_request_t结构
     /*描述符（监听或链接）*/
-    request->fd = fd;  
+    request->fd = fd;
     /*创建的epoll描述符*/
     request->epoll_fd = epoll_fd;
     request->pos = 0;
     request->last = 0;
     /*请求头解析状态*/
     request->state = 0;
-    /*配置目录*/
+    /*配置目录，在当前目录下，即“./”*/
     request->root = path;
     /*存储请求头，初始化以 list_head 为哨兵的双向链表*/
     INIT_LIST_HEAD(&(request->list));

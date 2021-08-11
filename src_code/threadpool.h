@@ -12,9 +12,11 @@
 
 /*task结构*/
 typedef struct tk_task{
+    /* 任务处理函数 */
     void (*func)(void*);
+    /* 传递给任务处理函数的参数 */
     void* arg;
-    struct tk_task* next;    // 任务链表（下一节点指针）
+    struct tk_task* next;    // 任务链表（下一节点指针）；单向链表
 }tk_task_t;
 
 /* threadpool结构*/
@@ -22,8 +24,8 @@ typedef struct threadpool{
     pthread_mutex_t lock;    // 互斥锁；#include <pthreadtypes.h>，包含于#include <pthread.h>
     pthread_cond_t cond;    // 条件变量；#include <pthreadtypes.h>，包含于#include <pthread.h>
     pthread_t *threads;    // 线程；#include <pthreadtypes.h>，包含于#include <pthread.h>
-    tk_task_t *head;    // 任务链表（链表中的头节点，头首末尾）
-    int thread_count;    // 线程数 
+    tk_task_t *head;    // 任务链表；链表中的头节点，无尾节点
+    int thread_count;    // 线程数；在初始化线程池时所建立的线程数
     int queue_size;    // 任务链表长
     int shutdown;     // 停机模式，0-未停机模式，1-立即停机模式，2-平滑停机模式
     int started; //工作线程的个数
@@ -40,7 +42,7 @@ typedef enum{
     tk_tp_thread_fail = -5,
 }tk_threadpool_error_t;
 
-/*threadpool_sd 枚举类型别名*/
+/* threadpool_shutdown 枚举类型别名 */
 typedef enum{
     /* 立即停机模式，即使有 task 也退出 */
     immediate_shutdown = 1,
@@ -48,11 +50,11 @@ typedef enum{
     graceful_shutdown = 2
 }tk_threadpool_sd_t;
 
-/*分配并初始化线程池*/
+/* 分配并初始化线程池 */
 tk_threadpool_t* threadpool_init(int thread_num);
-/**/
+/* 向pool线程池的task链表中添加任务节点 */
 int threadpool_add(tk_threadpool_t* pool, void (*func)(void *), void* arg);
-/*释放线程资源，不是释放线程池，释放线程池的函数是 threadpool_free*/
+/* 释放线程资源，不是释放线程池，真正释放线程池的函数是 threadpool_free，后续 threadpool_destory 会调用 */
 int threadpool_destroy(tk_threadpool_t* pool, int gracegul);
 
 #endif

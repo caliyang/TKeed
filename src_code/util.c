@@ -32,13 +32,13 @@ int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     char* delim_pos = NULL;
     int i = 0;
     int pos = 0;
-    int line_len = 0;                                              
+    int line_len = 0;
     
-    /*curr_pos不累计会覆盖，fp指向FILE 结构，因此会记住当前的文件输出位置，也就是会累计;
+    /*curr_pos不累计会覆盖，fp指向 FILE 结构，因此会记住当前的文件输出位置，也就是会累计;
         while循环的实际作用，获得文件中的root信息、port值、thread数量和当前行行长，
         不是每行中的这个信息，可以见“tkeed.conf”文件；
-        由于没有拿“tkeed.conf”文件看这段代码，无意义了好长时间猜测，下不为例！！！*/                                                                                                                                                                           
-    while(fgets(curr_pos, buff_len - pos, fp)){ //#include <stdio.h>
+        由于没有拿“tkeed.conf”文件看这段代码，无意义了好长时间猜测，下不为例！！！*/
+        while(fgets(curr_pos, buff_len - pos, fp)){ //#include <stdio.h>
         // 定位每行第一个界定符位置
         delim_pos = strstr(curr_pos, DELIM); //#include <string.h>
         if(!delim_pos)
@@ -81,7 +81,7 @@ int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     return TK_CONF_OK;
 }
 
-/*SIGPIPE写至无读进程的管道，默认行为是终止，该函数现将其都动作改为忽略*/
+/*SIGPIPE写至读进程已关闭的管道时，默认行为是终止，现该函数现将其都动作改为忽略*/
 void handle_for_sigpipe(){
     struct sigaction sa;
     memset(&sa, '\0', sizeof(sa)); //#include <string.h>
