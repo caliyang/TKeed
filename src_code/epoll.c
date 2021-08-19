@@ -3,13 +3,13 @@
 //
 
 /* 为什么不直接用现成的 #inlcude <sys/epoll.h >，02？？？
-    答：作者修改了正式的 #inlcude <sys/epoll.h > 头文件，新的头文件
-    命名为 #include "epoll.h"，以更好的适应本项目。 */
+   作者修改了正式的 #inlcude <sys/epoll.h > 头文件，新的头文件命名为 #include "epoll.h"，以更好的适应本项目。 */
 #include "epoll.h"
 
+/* events是epoll_event结构体数组 */
 struct epoll_event* events;
 
-/*创建一个epoll句柄，并为events结构体数组分配内存*/
+/* 创建一个epoll句柄，并为events结构体数组分配内存 */
 int tk_epoll_create(int flags){
     int epoll_fd = epoll_create1(flags); 
     if(epoll_fd == -1)

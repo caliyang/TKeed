@@ -14,8 +14,7 @@
 #include "http_request.h"
 #include "epoll.h"
 
-/*该函数的作用时是从filename所指向的配置文件中
-    读取根目录、端口和线程数等信息到conf所指向的结构体中*/
+/* 该函数的作用时是从filename所指向的配置文件中读取根目录、端口和线程数等信息到conf所指向的结构体中 */
 int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     // 以只读方式打开文件
     FILE* fp = fopen(filename, "r"); //#include <stdio.h>
@@ -81,7 +80,7 @@ int read_conf(char* filename, tk_conf_t* conf){ //#include "util.h"
     return TK_CONF_OK;
 }
 
-/*SIGPIPE写至读进程已关闭的管道时，默认行为是终止，现该函数现将其都动作改为忽略*/
+/* SIGPIPE写至读进程已关闭的管道时，默认行为是终止，现该函数现将其都动作改为忽略 */
 void handle_for_sigpipe(){
     struct sigaction sa;
     memset(&sa, '\0', sizeof(sa)); //#include <string.h>
@@ -92,7 +91,7 @@ void handle_for_sigpipe(){
         return;
 }
 
-/*该函数创建套接字、设置套接字选项、绑定地址，并使绑定地址的套接字处于监听状态*/
+/* 该函数创建套接字、设置套接字选项、绑定地址，并使绑定地址的套接字处于监听状态 */
 int socket_bind_listen(int port){
     // 检查port值，取正确区间范围
     /*此处的端口号应该用临时端口号，01？？？，0-1023,1024-49151,49152-65535*/
@@ -138,7 +137,7 @@ int socket_bind_listen(int port){
     return listen_fd;
 }
 
-/*该函数将套接字设置为非阻塞式I/O型，UNPv1第183面有详细解释*/
+/* 该函数将套接字设置为非阻塞式I/O型，UNPv1第183面有详细解释 */
 int make_socket_non_blocking(int fd){
     int flag = fcntl(fd, F_GETFL, 0); //#include <fcntl.h>
     if(flag == -1)
@@ -159,7 +158,7 @@ void accept_connection(int listen_fd, int epoll_fd, char* path){
         perror("accept"); //#include <stdio.h>
 
     // 设为非阻塞模式
-    /*accept 的时候，套接字为阻塞模式*/
+    /* accept的时候，套接字为阻塞模式 */
     int rc = make_socket_non_blocking(accept_fd);
 
     // 申请tk_http_request_t类型节点并初始化

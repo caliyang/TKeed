@@ -28,13 +28,13 @@ extern size_t tk_current_msec;
 
 /* 初始化timer优先队列，比较函数设置为timer_comp，优先队列里面的成员为time_t结构体 */
 int tk_timer_init(); 
-/* 该函数返回队列中最早时间和当前时间之差 */
+/* 超时查找函数：该函数返回优先队列中最早时间和当前时间之差，以此来确定队列中是否有超时的计时器 */
 int tk_find_timer();
 /* 超时检查函数 */
 void tk_handle_expire_timers();
-/* 将新创建的按照参数要求初始化的timer_node节点插入timer优先队列中 */
+/* 将新创建的timer_t节点加入http_request_t结构体和插入timer优先队列中 */
 void tk_add_timer(tk_http_request_t* request, size_t timeout, timer_handler_pt handler);
-/* 将request结构体中timer节点的deleted成员置为1 */
+/* 将http_request_t结构体中timer优先队列节点的deleted成员置为1 */
 void tk_del_timer(tk_http_request_t* request);
 /* 比较两个计时器的超时时间 */
 int timer_comp(void *ti, void *tj);

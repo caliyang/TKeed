@@ -166,8 +166,8 @@ tk_threadpool_t *threadpool_init(int thread_num){
     /* 动态分配线程数组（存放tid），数组大小即为线程数 */
     pool->threads = (pthread_t*)malloc(sizeof(pthread_t) * thread_num);
     
-    // 分配并初始化 task 头节点
-    /* 动态分配并初始化 task 链表中的头节点 */
+    // 分配并初始化task头节点
+    /* 动态分配并初始化task链表中的头节点 */
     pool->head = (tk_task_t*)malloc(sizeof(tk_task_t));
     if((pool->threads == NULL) || (pool->head == NULL))
         goto err;
@@ -185,7 +185,7 @@ tk_threadpool_t *threadpool_init(int thread_num){
 
     // 创建线程
     for(int i = 0; i < thread_num; ++i){
-        /* pool 是传给任务处理函数的参数 */
+        /* pool是传给任务处理函数的参数 */
         if(pthread_create(&(pool->threads[i]), NULL, threadpool_worker, (void*)pool) != 0){ // #include <pthread.h>
             threadpool_destory(pool, 0);
             return NULL;
@@ -195,8 +195,8 @@ tk_threadpool_t *threadpool_init(int thread_num){
     }
     return pool;
 
-/* 若指针 pool 已分配内存，则先释放在返回 NULL，若没有分配内存，则直接返回NULL */
-/* 如果是在初始化 cond 时转跳到这里，那是否需要在 free pool 前，先 destory 掉 lock，02？？？ */
+/* 若指针pool已分配内存，则先释放在返回NULL，若没有分配内存，则直接返回NULL */
+/* 如果是在初始化cond时转跳到这里，那是否需要在free pool前，先destory掉lock，02？？？ */
 err:
     if(pool)
         threadpool_free(pool);

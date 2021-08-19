@@ -27,8 +27,7 @@ void tk_time_update(){
     tk_current_msec = ((tv.tv_sec * 1000) + (tv.tv_usec / 1000)); 
 }
 
-/* 初始化timer优先队列，比较函数置为timer_comp，队列大小为500？501？，02？？？
-    优先队列里面的成员为 time_t 结构体 */
+/* 初始化timer优先队列，比较函数置为timer_comp，优先队列里面的成员为 time_t 结构体 */
 int tk_timer_init(){
     // 建立连接后立即初始化
     // 初始优先队列大小TK_PQ_DEFAULT_SIZE = 10
@@ -40,7 +39,7 @@ int tk_timer_init(){
     return 0;
 }
 
-/* 该函数返回优先队列中最早时间和当前时间之差 */
+/* 超时查找函数：该函数返回优先队列中最早时间和当前时间之差，以此来确定队列中是否有超时的计时器 */
 /* 如果优先队列中无节点，那么返回的time为未定义值，这样处理不好吧。可以这样：
    46 int time = 0;
    69 这一句可以去掉； */
@@ -74,8 +73,8 @@ int tk_find_timer(){
 }
 
 /* 超时检查函数 */
-/* 处理优先队列节点等待时间超时的request请求 */
-/* tk_handle_expire_timers()函数会处理并删除超时优先队列节点，但tk_pq_delmin()不会 */
+/* 检查并处理优先队列节点等待时间超时的request请求 */
+/* tk_handle_expire_timers会检查、处理并删除超时优先队列节点，但tk_del_timer不会 */
 void tk_handle_expire_timers(){
     while(!tk_pq_is_empty(&tk_timer)){
         // 更新当前时间
@@ -107,15 +106,14 @@ void tk_handle_expire_timers(){
     }
 }
 
-/* 将新创建的按照参数要求初始化的 timer_node 节点插入 timer 优先队列中 */
+/* 将新创建的timer_t节点加入http_request_t结构体和插入timer优先队列中 */
 void tk_add_timer(tk_http_request_t* request, size_t timeout, timer_handler_pt handler){
     tk_time_update();
     // 申请新的tk_timer_t节点，并加入到tk_http_request_t的timer下
     /* 为优先队列节点分配空间 */
     tk_timer_t* timer_node = (tk_timer_t*)malloc(sizeof(tk_timer_t));
-    /* 为优先队列节点设置 timer 成员，该指针指向一个 timer_t 结构体 */
     request->timer = timer_node;
-    /* 初始化 timer_node 指向的结构体 */
+    /* 初始化timer_node指向的tk_timer_t节点 */
     // 加入时，设置超时阈值，删除信息等
     timer_node->key = tk_current_msec + timeout;
     timer_node->deleted = 0;
@@ -123,14 +121,11 @@ void tk_add_timer(tk_http_request_t* request, size_t timeout, timer_handler_pt h
     // 注意需要在tk_timer_t节点中反向设置指向对应resquest的指针
     timer_node->request = request;
     // 将新节点插入优先队列
-    /* 将新创建的 timer_node 节点插入 timer 优先队列中 */
-    /* timer_node 是一个指向 timer_t 结构体的指针 */
+    /* 将新创建的tk_timer_t节点插入timer优先队列中 */
     int rc = tk_pq_insert(&tk_timer, timer_node);
 }
 
-/* 将 request 结构体中 timer 节点的 deleted 成员置为 1 */
-/* 也就是将该 timer 节点标记为删除，后续在 find_timer 和 handle_expire_timers 
-   中删除并释放该节点 */
+/* 将http_request_t中的时间戳结构中的deleted成员置为1 */
 void tk_del_timer(tk_http_request_t* request) {
     tk_time_update();
     tk_timer_t* timer_node = request->timer;

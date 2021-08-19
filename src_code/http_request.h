@@ -31,7 +31,7 @@
 #define TK_HTTP_NOT_FOUND                   404
 #define MAX_BUF 8124
 
-/*请求信息结构*/
+/* 请求信息结构 */
 typedef struct tk_http_request{
     char* root; // 配置目录
     int fd; // 描述符（监听、连接）
@@ -64,7 +64,7 @@ typedef struct tk_http_request{
     void* timer; // 指向时间戳结构
 }tk_http_request_t;
 
-/*响应头结构*/
+/* 响应头结构 */
 typedef struct tk_http_out{
     int fd;
     int keep_alive;
@@ -88,7 +88,7 @@ typedef struct tk_http_header_handle{
     tk_http_header_handler_pt handler;    // 函数指针
 }tk_http_header_handle_t;
 
-/*全局变量 tk_http_headers_in 的声明*/
+/* 全局变量tk_http_headers_in的声明 */
 extern tk_http_header_handle_t tk_http_headers_in[]; 
 
 void tk_http_handle_header(tk_http_request_t* request, tk_http_out_t* out);
