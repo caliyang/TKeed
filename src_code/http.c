@@ -185,7 +185,12 @@ void do_request(void* ptr){
         plast = &request->buff[request->last % MAX_BUF];
 
         // remain_size表示缓冲区当前剩余可写入字节数
-        /* MAX_BUF - (request->last - request->pos) - 1，02？？？ */
+        /* MAX_BUF - (request->last - request->pos) - 1，02？？？
+           需要判断MIN的原因是信号中断可能引起某次解析的pos小于last，为解决这个问题，
+           左边的MAX_BUF - (request->last - request->pos) - 1用于保证request->last不会超过request->pos一圈，
+           -1可以使得request->last在request->pos左边一位停下，request->pos在该次解析中最多到request->last一位停
+           下，因此，从原因上看，-1也是可以不用要的，此时刚好为一圈；
+           右边的MAX_BUF - request->last % MAX_BUF用于保证用户缓冲区不溢出； */
         remain_size = MIN(MAX_BUF - (request->last - request->pos) - 1, MAX_BUF - request->last % MAX_BUF);
 
         // 从连接描述符fd读取数据并复制到用户缓冲区plast指向的开始位置
