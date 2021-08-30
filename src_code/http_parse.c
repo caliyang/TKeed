@@ -10,26 +10,39 @@ int tk_http_parse_request_line(tk_http_request_t *request){
     /* 枚举常量表用于表示http request的识别状态 */
     /* sw_表示short word */
     enum{
-        /* 开始解析http request文件 */
+        /* 下列短词中，没写的指针指向情况一般是报错或跳过 */
+
+        /* （短：通常情况下只进入一次；报错）开始解析http request文件，进入时指向请求方法中的第一个字符，也有可能是空行（换行标志，会跳过） */
         sw_start = 0,
-        /* 开始解析请求方法字段，包括GET、POST和HEAD，本http服务器仅支持HTTP 1.0 */
-        /* 进入时指向请求方法中的第一个字符 */
+        /* （长：通常情况下会进入多次；报错或跳过）开始解析请求方法字段，直到指向请求方法后面的空格 */
+        /* 进入时指向请求方法中的第二个字符 */
         sw_method,
-        /* 开始解析URI，进入时指向URL的第一个字符‘/’ */
-        /* 命名中的before可以理解为在pos指向URL前/请求方法后的空格时获得该状态 */
+        /* （短；报错）开始解析URL地址，进入时指向URL地址的第一个字符'/'，也有可能是http版本号前面的多余空格（会跳过） */
+        /* 命名中的before可以理解为在pos指向请求方法后的空格时获得该状态 */
         sw_spaces_before_uri,
-        /*  */
+        /* （长；跳过）解析URL地址，进入时指向URL地址'/'后面的一个字符，直到指向URL地址后面的空格 */
         sw_after_slash_in_uri,
+        /* （短；报错）开始解析HTTP版本号，进入时指向版本号的第一个字符'H'，也有可能是http版本号前面的多余空格（会跳过） */
         sw_http,
+        /* （短；报错）开始解析HTTP版本号第一个字符，进入时指向版本号的第二个字符'T' */
         sw_http_H,
+        /* （短；报错）开始解析HTTP版本号第二个字符，进入时指向版本号的第三个字符'T' */
         sw_http_HT,
+        /* （短；报错）开始解析HTTP版本号第三个字符，进入时指向版本号的第四个字符'P' */
         sw_http_HTT,
+        /* （短；报错）开始解析HTTP版本号第四个字符，进入时指向版本号的第五个字符'/' */
         sw_http_HTTP,
+        /* （短；报错）开始解析HTTP主版本号的第一个数字，进入时指向主版本号的第一个数字 */
         sw_first_major_digit,
+        /* （短；报错）开始解析HTTP主版本号的第二个数字，进入时指向'.'，也有可能是主版本号的第二个数字 */
         sw_major_digit,
+        /* （短；报错）开始解析HTTP副版本号的第一个数字，进入时指向副版本号的第一个数字 */
         sw_first_minor_digit,
+        /* （短；报错）开始解析HTTP副版本号的第二个数字，进入时指向换行标志（回车符或换行符），也有可能是副版本号的第二个数字或多余空格（空格会跳过） */
         sw_minor_digit,
+        /* （短；报错）开始解析换行标志，指向换行标志的第一个字符，也有可能是多余空格（空格会跳过） */
         sw_spaces_after_digit,
+        /* （短；报错）考虑操作系统是Windows的情况，开始解析换行标志的第二个字符，指向换行标志的第二个字符 */
         sw_almost_done
     }state;
     state = request->state;
@@ -43,10 +56,10 @@ int tk_http_parse_request_line(tk_http_request_t *request){
         switch(state){
             case sw_start:
                 request->request_start = p;
-                /* ch == CR || ch == LF，02？？？ */
+                /* ch == CR || ch == LF，02？？？排除请求行前的空行 */
                 if(ch == CR || ch == LF)
                     break;
-                /* ch != '_'，01？？？http有限状态机解析请求中无此条件 */
+                /* ch != '_'，02？？？排除无效请求方法，在Nginx的源码中，还包括这一条件：&& ch != '-' */
                 if((ch < 'A' || ch > 'Z') && ch != '_')
                     return TK_HTTP_PARSE_INVALID_METHOD;
                 state = sw_method;
@@ -63,7 +76,8 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                                 request->method = TK_HTTP_GET;
                                 break;
                             }
-                            /* 此处应该报错或者跳到default而不是break，因为此时method未初始化 */
+                            /* 此处应该报错或者跳到default而不是break，因为此时method未初始化，01？？？
+                               会在case sw_spaces_before_uri里return TK_HTTP_PARSE_INVALID_REQUEST */
                             break;
                         case 4:
                             if(tk_str3Ocmp(m, 'P', 'O', 'S', 'T')){
@@ -74,18 +88,20 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                                 request->method = TK_HTTP_HEAD;
                                 break;
                             }
-                            /* 此处应该报错或者跳到default而不是break，因为此时method未初始化 */
+                            /* 此处应该报错或者跳到default而不是break，因为此时method未初始化，01？？？ 
+                               会在case sw_spaces_before_uri里return TK_HTTP_PARSE_INVALID_REQUEST */
                             break;
                         default:
                             request->method = TK_HTTP_UNKNOWN;
-                            /* break继续往后解析，但此时的method被初始化为TK_HTTP_UNKNOWN，01？？？？ */
+                            /* break后继续解析其余字段，但此时的method被初始化为TK_HTTP_UNKNOWN，01？？？
+                               会在case sw_spaces_before_uri里return TK_HTTP_PARSE_INVALID_REQUEST */
                             break;
                     }
                     state = sw_spaces_before_uri;
                     break;
                 }
 
-                /* ch != '_'，01？？？http有限状态机解析请求中无此条件 */
+                /* ch != '_'，02？？？排除无效请求方法，在Nginx的源码中，还包括这一条件：&& ch != '-' */
                 if((ch < 'A' || ch > 'Z') && ch != '_')
                     return TK_HTTP_PARSE_INVALID_METHOD;
                 break;
@@ -98,10 +114,12 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                 }
                 switch(ch){
                     case ' ':
+                        /* 过滤掉URL地址前多余的空格 */
                         break;
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */
                 break;
 
             case sw_after_slash_in_uri:
@@ -113,10 +131,12 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         break;
                 }
+                /* 此处没必要加break，01？？？ */                
                 break;
 
             case sw_http:
                 switch(ch){
+                    /* 过滤掉URL地址前多余的空格 */
                     case ' ':
                         break;
                     case 'H':
@@ -125,6 +145,7 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */                
                 break;
 
             case sw_http_H:
@@ -135,6 +156,7 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */                
                 break;
 
             case sw_http_HT:
@@ -145,6 +167,7 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */                
                 break;
 
             case sw_http_HTT:
@@ -155,6 +178,7 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */                
                 break;
 
             case sw_http_HTTP:
@@ -165,11 +189,13 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                     default:
                         return TK_HTTP_PARSE_INVALID_REQUEST;
                 }
+                /* 此处没必要加break，01？？？ */                 
                 break;
 
             case sw_first_major_digit:
                 if(ch < '1' || ch > '9')
                     return TK_HTTP_PARSE_INVALID_REQUEST;
+                /* ch - '0'，可以方便计算出主版本号的第一个数字 */
                 request->http_major = ch - '0';
                 state = sw_major_digit;
                 break;
@@ -181,10 +207,12 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                 }
                 if(ch < '0' || ch > '9')
                     return TK_HTTP_PARSE_INVALID_REQUEST;
+                /* 考虑到主版本号更迭到双位数的情况，此时指向主版本号的第二个字符，实际上现在只有0.9/1./1.1/2.0四个版本 */
                 request->http_major = request->http_major * 10 + ch - '0';
                 break;
 
             case sw_first_minor_digit:
+                /* 指向副版本号的第一个字符 */
                 if(ch < '0' || ch > '9')
                     return TK_HTTP_PARSE_INVALID_REQUEST;
                 request->http_minor = ch - '0';
@@ -192,28 +220,35 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                 break;
 
             case sw_minor_digit:
+                /* 指向回车符（Mac系统换行标志或Window系统换行标志的第一个字符） */
                 if(ch == CR){
                     state = sw_almost_done;
                     break;
                 }
+                /* 指向换行符（Unix系统换行标志） */
                 if(ch == LF)
                     goto done;
+                /* 指向空格的情况 */
                 if(ch == ' '){
                     state = sw_spaces_after_digit;
                     break;
                 }
                 if(ch < '0' || ch > '9')
                     return TK_HTTP_PARSE_INVALID_REQUEST;
+                /* 考虑到副版本号更迭到双位数的情况，此时指向副版本号的第二个字符，实际上现在只有0.9/1./1.1/2.0四个版本 */
                 request->http_minor = request->http_minor * 10 + ch - '0';
                 break;
 
             case sw_spaces_after_digit:
                 switch(ch){
+                    /* 忽略副版本号之后，换行标志之前的多余空格 */
                     case ' ':
                         break;
+                    /* 对于Windows的换行标志 */    
                     case CR:
                         state = sw_almost_done;
                         break;
+                    /* 对于Unix的换行标志 */
                     case LF:
                         goto done;
                     default:
@@ -222,6 +257,7 @@ int tk_http_parse_request_line(tk_http_request_t *request){
                 break;
 
             case sw_almost_done:
+                /* 考虑是Wnindows的情况 */
                 request->request_end = p - 1;
                 switch(ch){
                     case LF:
@@ -236,8 +272,12 @@ int tk_http_parse_request_line(tk_http_request_t *request){
     return TK_AGAIN;
 
     done:
+    /* request->pos指向请求头的第一个字符 */
     request->pos = pi + 1;
+    /* request_end什么时候不为NULL，02？？？？
+       对于Windows系统而言，request->request_end指向回车符，不进入该if语句 */
     if (request->request_end == NULL)
+        /* request_end指向请求行末尾的换行符 */
         request->request_end = p;
     request->state = sw_start;
     return 0;

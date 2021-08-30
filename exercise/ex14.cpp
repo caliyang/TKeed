@@ -1,5 +1,5 @@
 #include <iostream>
-using namespacestd;
+using namespace std;
 
 // Cat类禁用默认构造函数, 无法默认初始化
 class Cat {
