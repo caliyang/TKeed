@@ -1,15 +1,23 @@
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
 
-int main ()
+int total = 0;
+
+int square(int i)
 {
-   char src[20], dest[13];
+    int result=0;
 
-   strcpy(src, "Thiswhat");
-   strcpy(dest, "This is de");
-   strncat(dest, src, 4);
+    result = i*i;
 
-   printf("最终的目标字符串： |%d|", strlen(dest));
-   
-   return(0);
+    return result;
+}
+
+int main(int argc, char **argv)
+{
+    int i;
+
+    for(i=0; i<10; i++)
+    {
+        total += square(i);
+    }
+    return 0;
 }

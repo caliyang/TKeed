@@ -1,0 +1,52 @@
+[
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/epoll.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/epoll.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/epoll.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/http.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/http.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/http.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/http_parse.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/http_parse.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/http_parse.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/http_request.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/http_request.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/http_request.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/main.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/main.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/main.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/priority_queue.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/priority_queue.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/priority_queue.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/rio.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/rio.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/rio.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/threadpool.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/threadpool.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/threadpool.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/timer.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/timer.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/timer.c"
+},
+{
+  "directory": "/home/yang/Project/http_web_server/TKeed/build",
+  "command": "/usr/bin/x86_64-linux-gnu-gcc-7   -g   -o CMakeFiles/src_code.dir/util.c.o   -c /home/yang/Project/http_web_server/TKeed/src_code/util.c",
+  "file": "/home/yang/Project/http_web_server/TKeed/src_code/util.c"
+}
+]
